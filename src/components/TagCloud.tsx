@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import WordCloud from '@visx/wordcloud/lib/WordCloud';
+import Wordcloud from '@visx/wordcloud/lib/Wordcloud';
 import { Text } from '@visx/text';
 import { scaleLog } from '@visx/scale';
 
@@ -65,7 +65,7 @@ export const TagCloud = () => {
   return (
     <div ref={containerRef} className="w-full">
       <div style={{ width: dimensions.width, height: dimensions.height }} className="relative">
-        <WordCloud
+        <Wordcloud
           words={words}
           width={dimensions.width}
           height={dimensions.height}
@@ -90,7 +90,7 @@ export const TagCloud = () => {
               </Text>
             ))
           }
-        </WordCloud>
+        </Wordcloud>
       </div>
     </div>
   );
