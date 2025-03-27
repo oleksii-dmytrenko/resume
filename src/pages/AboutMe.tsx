@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Download, Github, Linkedin, Briefcase } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import AskMeAnything from '../components/AskMeAnything';
 
 const AboutMe = () => {
   const greetingVariants = {
@@ -103,6 +104,7 @@ const AboutMe = () => {
               </div>
             </div>
           </div>
+          <AskMeAnything />
         </div>
       </div>
     </PageTransition>
