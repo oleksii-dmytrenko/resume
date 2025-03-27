@@ -4,7 +4,7 @@ import PageTransition from '../components/PageTransition';
 
 const experiences = [
   {
-    company: 'VitrueTraffic.',
+    company: 'VitrueTraffic',
     position: 'Senior R&D Engineer',
     period: '2022 - 2024',
     description:

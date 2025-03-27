@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Download } from 'lucide-react';
+import { Download, Github, Linkedin, Briefcase } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 
 const AboutMe = () => {
@@ -69,6 +69,38 @@ const AboutMe = () => {
                 <Download className="w-5 h-5 mr-2" />
                 Download CV
               </motion.a>
+              <div className="flex gap-4 mt-6 justify-center md:justify-start">
+                <motion.a
+                  href="https://github.com/oleksii-dmytrenko"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Github className="w-6 h-6 text-white" />
+                </motion.a>
+                <motion.a
+                  href="https://www.linkedin.com/in/oleksii-dmytrenko-606953b1/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Linkedin className="w-6 h-6 text-white" />
+                </motion.a>
+                <motion.a
+                  href="https://www.upwork.com/freelancers/~01577e3b655ae9340e"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Briefcase className="w-6 h-6 text-white" />
+                </motion.a>
+              </div>
             </div>
           </div>
         </div>
