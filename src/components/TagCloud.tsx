@@ -22,8 +22,9 @@ const words: WordData[] = [
   { text: 'Big Data', value: 60 },
   { text: 'Machine Learning', value: 70 },
   { text: 'AI agents', value: 75 },
+  { text: 'AI workflows', value: 75 },
   { text: 'LangChain', value: 65 },
-  { text: 'AWS', value: 75 },
+  { text: 'AWS', value: 80 },
   { text: 'Docker', value: 70 },
   { text: 'Terraform', value: 65 },
 ];
