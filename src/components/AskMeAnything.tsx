@@ -8,12 +8,6 @@ const questionSuggestions = [
   "What is your timezone?",
 ];
 
-const predefinedResponses = {
-  "What is your experience with AI?": "I started utilizing ML back in 2017 for sentiment analysis and have used it for different purposes over the years. Now I'm all in into generative AI.",
-  "Are you available?": "I'm currently available but that's not likely to stay this way for long.",
-  "What is your timezone?": "I frequently work from Europe and East Asia and tend to have half day overlap with US."
-};
-
 const AskMeAnything = () => {
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState('');
@@ -37,17 +31,6 @@ const AskMeAnything = () => {
     if (!message.trim()) return;
 
     setIsLoading(true);
-    // Check if it's a predefined question
-    const predefinedResponse = predefinedResponses[message as keyof typeof predefinedResponses];
-    if (predefinedResponse) {
-      setTimeout(() => {
-        setResponse(predefinedResponse);
-        setIsLoading(false);
-      }, 1000);
-      return;
-    }
-
-    // For custom questions, make API call
     try {
       const response = await fetch(getApiUrl(), {
         method: 'POST',
@@ -62,7 +45,7 @@ const AskMeAnything = () => {
       }
 
       const data = await response.json();
-      setResponse(data.answer	|| "I apologize, but I couldn't process your question. Please try rephrasing it or ask one of the suggested questions.");
+      setResponse(data.answer || "I apologize, but I couldn't process your question. Please try rephrasing it or ask one of the suggested questions.");
     } catch (error) {
       setResponse("I apologize, but I encountered an error processing your question. Please try again later or ask one of the suggested questions.");
     } finally {
