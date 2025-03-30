@@ -30,7 +30,7 @@ const AboutMe = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <img
-              src="/avatar3.jpeg"
+              src="/avatar5.jpg"
               alt="Profile"
               className="w-64 h-64 rounded-full object-cover border-4 border-white/10"
             />
