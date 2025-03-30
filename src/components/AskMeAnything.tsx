@@ -98,6 +98,12 @@ const AskMeAnything = () => {
               setMessage(e.target.value);
               setResponse(''); // Clear response when typing
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                formRef.current?.requestSubmit();
+              }
+            }}
             placeholder="Type your message here..."
             className="w-full h-32 bg-white/5 border border-white/10 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
