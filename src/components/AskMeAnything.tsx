@@ -20,17 +20,54 @@ const AskMeAnything = () => {
   const [isLoading, setIsLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const getApiUrl = () => {
+    // Check if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      const isLocalhost = window.location.hostname === 'localhost';
+      return isLocalhost 
+        ? 'http://localhost:3000/api/analyze-resume'
+        : 'https://resume-ai-xi-one.vercel.app/api/analyze-resume';
+    }
+    // Fallback to production URL if not in browser
+    return 'https://resume-ai-xi-one.vercel.app/api/analyze-resume';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
     setIsLoading(true);
-    // Simulate AI response delay
-    setTimeout(() => {
-      const predefinedResponse = predefinedResponses[message as keyof typeof predefinedResponses];
-      setResponse(predefinedResponse || "I'm an AI assistant. I can only answer specific questions about Olek's experience, availability, and timezone. Please try one of the suggested questions or rephrase your question.");
+    // Check if it's a predefined question
+    const predefinedResponse = predefinedResponses[message as keyof typeof predefinedResponses];
+    if (predefinedResponse) {
+      setTimeout(() => {
+        setResponse(predefinedResponse);
+        setIsLoading(false);
+      }, 1000);
+      return;
+    }
+
+    // For custom questions, make API call
+    try {
+      const response = await fetch(getApiUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: message }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      const data = await response.json();
+      setResponse(data.answer	|| "I apologize, but I couldn't process your question. Please try rephrasing it or ask one of the suggested questions.");
+    } catch (error) {
+      setResponse("I apologize, but I encountered an error processing your question. Please try again later or ask one of the suggested questions.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
