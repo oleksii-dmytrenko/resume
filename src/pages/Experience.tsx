@@ -4,6 +4,13 @@ import PageTransition from '../components/PageTransition';
 
 const experiences = [
   {
+    company: 'Propagentix AI',
+    position: 'AI Engineer',
+    period: '2025 - present',
+    description:
+      'Developed educational AI platform for property developers and real estate flippers.',
+  },
+  {
     company: 'VitrueTraffic',
     position: 'Senior R&D Engineer',
     period: '2022 - 2024',

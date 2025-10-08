@@ -29,13 +29,10 @@ const AboutMe = () => {
       <div className="min-h-screen pt-20 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-8">
-            <video
-              src="/noding1.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-64 h-64 rounded-full object-cover border-4 border-white/10 bg-white"
+            <img
+              src="/ava-japan.jpg"
+              alt="Olek"
+              className="w-64 h-48 rounded-full object-cover border-4 border-white/10 bg-white"
             />
             <div className="text-center md:text-left">
               <motion.h1
