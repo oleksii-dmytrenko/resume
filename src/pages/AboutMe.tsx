@@ -82,7 +82,7 @@ const AboutMe = () => {
                   <Github className="w-6 h-6 text-white" />
                 </motion.a>
                 <motion.a
-                  href="https://www.linkedin.com/in/oleksii-dmytrenko-606953b1/"
+                  href="https://www.linkedin.com/in/olek-dmytrenko-606953b1/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all"
