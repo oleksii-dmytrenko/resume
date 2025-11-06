@@ -67,14 +67,14 @@ const AskMeAnything = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
-      className="mt-16"
+      className="mt-12 sm:mt-16"
     >
       <h2 className="text-2xl font-bold text-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-6">
         Ask Anything About Me
       </h2>
       <div className="relative max-w-2xl mx-auto">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 rounded-lg blur opacity-30 animate-gradient-x"></div>
-        <form ref={formRef} onSubmit={handleSubmit} className="relative bg-white/5 rounded-lg p-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="relative bg-white/5 rounded-lg p-4 sm:p-6">
           <div className="flex flex-wrap gap-2 mb-4">
             {questionSuggestions.map((suggestion, index) => (
               <motion.button
@@ -105,7 +105,7 @@ const AskMeAnything = () => {
               }
             }}
             placeholder="Type your message here..."
-            className="w-full h-32 bg-white/5 border border-white/10 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-28 sm:h-32 bg-white/5 border border-white/10 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <div className="mt-4 flex items-center gap-3">
             <motion.button

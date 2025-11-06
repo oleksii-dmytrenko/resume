@@ -32,11 +32,11 @@ const AboutMe = () => {
             <img
               src="/ava-japan.jpg"
               alt="Olek"
-              className="w-64 h-48 rounded-full object-cover border-4 border-white/10 bg-white"
+              className="w-28 h-28 sm:w-40 sm:h-40 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full object-cover border-4 border-white/10 bg-white"
             />
             <div className="text-center md:text-left">
               <motion.h1
-                className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
+                className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
                 variants={greetingVariants}
                 initial="hidden"
                 animate="visible"
@@ -51,7 +51,7 @@ const AboutMe = () => {
                   </motion.span>
                 ))}
               </motion.h1>
-              <p className="text-xl text-gray-300 mt-2">I am a Full Stack AI Engineer</p>
+              <p className="text-lg sm:text-xl text-gray-300 mt-2">I am a Full Stack AI Engineer</p>
               <p className="text-gray-400 mt-4">
                 Passionate about creating innovative solutions and pushing the boundaries
                 of what's possible with modern web technologies. With over 8 years of

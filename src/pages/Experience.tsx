@@ -45,7 +45,7 @@ const Experience = () => {
     <PageTransition>
       <div className="min-h-screen pt-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-12">
             Professional Journey
           </h2>
           <div className="space-y-8">

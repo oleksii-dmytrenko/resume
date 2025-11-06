@@ -44,7 +44,7 @@ const WhyMe = () => {
     <PageTransition>
       <div className="min-h-screen pt-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-12">
             Why Choose Me?
           </h2>
           <div className="grid md:grid-cols-3 gap-8 mb-16">
@@ -67,7 +67,7 @@ const WhyMe = () => {
             ))}
           </div>
 
-          <h3 className="text-2xl font-bold text-center text-white mb-8">
+          <h3 className="text-xl sm:text-2xl font-bold text-center text-white mb-8">
             What Others Say
           </h3>
           <div className="grid md:grid-cols-2 gap-8">
