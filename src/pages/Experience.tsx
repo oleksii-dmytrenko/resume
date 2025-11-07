@@ -4,7 +4,7 @@ import PageTransition from '../components/PageTransition';
 
 const experiences = [
   {
-    company: 'Propagentix AI',
+    company: 'Progentix AI',
     position: 'AI Engineer Team Lead',
     period: '2025 - present',
     description:
