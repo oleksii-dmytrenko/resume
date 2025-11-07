@@ -5,35 +5,35 @@ import PageTransition from '../components/PageTransition';
 const experiences = [
   {
     company: 'Propagentix AI',
-    position: 'AI Engineer',
+    position: 'AI Engineer Team Lead',
     period: '2025 - present',
     description:
-      'Developed educational AI platform for property developers and real estate flippers.',
+      'Developed educational AI driven platform for property developers and real estate flippers.',
   },
   {
     company: 'VitrueTraffic',
-    position: 'Senior R&D Engineer',
+    position: 'Lead R&D Engineer',
     period: '2022 - 2024',
     description:
       'Developed cloud-native, hight-load, AI-powered platform for traffic management and optimization.',
   },
   {
     company: 'StreetShares',
-    position: 'Full Stack Developer',
+    position: 'Senior Full Stack Developer',
     period: '2019 - 2022',
     description:
       'Developed and maintained multiple client fintech applications using React and Python. Helped to build PPP loan platform.',
   },
   {
     company: 'Spartacs',
-    position: 'Full Stack Developer',
+    position: 'Lead Developer',
     period: '2018 - 2020',
     description:
       'Built hight-load traffic management applications using React and Node.js',
   },
   {
     company: 'Sandsiv',
-    position: 'Backend Developer',
+    position: 'Tech Lead',
     period: '2015 - 2018',
     description:
       'Developed analytics and big data processing ML applications using Python and Angular.',
