@@ -4,8 +4,8 @@ import { TagCloud } from '../components/TagCloud';
 
 const skills = [
   { name: 'Full Stack Development', level: 90 },
-  { name: 'Cloud Architecture', level: 85 },
-  { name: 'AI/ML Engineering', level: 80 },
+  { name: 'AI/ML Engineering', level: 85 },
+  { name: 'Cloud Architecture', level: 80 },
   { name: 'High-Load & Big Data', level: 75 },
   { name: 'UI/UX Design', level: 70 },
 ];
