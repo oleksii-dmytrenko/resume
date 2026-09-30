@@ -42,8 +42,8 @@ const links = [
     icon: <WhatsAppIcon className="w-6 h-6" />,
   },
   {
-    href: 'https://t.me/olek.tech',
-    label: 'Telegram @olek.tech',
+    href: 'https://t.me/olek_oleksii',
+    label: 'Telegram @olek_oleksii',
     external: true,
     hoverText: 'group-hover:text-[#229ED9]',
     icon: <TelegramIcon className="w-6 h-6" />,
