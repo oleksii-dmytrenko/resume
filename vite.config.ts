@@ -7,4 +7,10 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  server: {
+    proxy: {
+      // wrangler dev serves the worker (with /api routes) on 8787
+      '/api': 'http://localhost:8787',
+    },
+  },
 });

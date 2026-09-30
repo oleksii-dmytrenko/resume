@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# cloudflare
+.dev.vars
+.wrangler
+
+# terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# zcode session state
+.zcode/
