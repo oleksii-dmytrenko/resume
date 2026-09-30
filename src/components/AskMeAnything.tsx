@@ -1,6 +1,8 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { DeepChat } from 'deep-chat-react';
+import type { DeepChat as DeepChatElement } from 'deep-chat';
+import { RotateCcw } from 'lucide-react';
+import { useRef } from 'react';
 
 const questionSuggestions = [
   "What is your experience with AI?",
@@ -8,58 +10,97 @@ const questionSuggestions = [
   "What is your timezone?",
 ];
 
+// auxiliaryStyle is injected inside deep-chat's shadow DOM, so selectors must
+// match the component's internal structure and must be set as a property -
+// React passes string props to custom elements as attributes, which deep-chat
+// ignores. Colors/typography mirror the site: white/5 cards, white/10 borders,
+// blue-500 -> purple-600 accents, gray-200/300 text, system-ui font.
+const chatStyles = `
+  :host {
+    background-color: transparent;
+  }
+
+  #chat-view, #input, #text-input {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+      Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  #messages {
+    padding: 6px 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+  #messages::-webkit-scrollbar { width: 6px; }
+  #messages::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+  }
+
+  .message-bubble {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    max-width: 75%;
+  }
+  .message-bubble.user-message {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.45), rgba(147, 51, 234, 0.45));
+    border-color: rgba(147, 197, 253, 0.25);
+    color: #ffffff;
+  }
+  .message-bubble.error-message {
+    background-color: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+  }
+  .message-bubble p { margin: 0 0 0.5em; }
+  .message-bubble p:last-child { margin-bottom: 0; }
+  .message-bubble code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0 4px;
+    border-radius: 4px;
+  }
+
+  #input {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 10px;
+  }
+  #text-input-container {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  #text-input-container:focus-within {
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+  #text-input { color: #ffffff; }
+  #text-input span { color: #9ca3af; }
+
+  .input-button-svg {
+    background: linear-gradient(90deg, #3b82f6, #9333ea);
+    border-radius: 10px;
+  }
+  .input-button-svg svg { fill: #ffffff; }
+  .input-button.disabled-button .input-button-svg {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .input-button.disabled-button .input-button-svg svg { fill: #6b7280; }
+
+  .loading-message-dots-container { --loading-message-color: #60a5fa; }
+`;
+
 const AskMeAnything = () => {
-  const [message, setMessage] = useState('');
-  const [response, setResponse] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  const getApiUrl = () => {
-    // Check if we're in a browser environment
-    if (typeof window !== 'undefined') {
-      const isLocalhost = window.location.hostname === 'localhost';
-      return isLocalhost 
-        ? 'http://localhost:3000/api/analyze-resume'
-        : 'https://resume-ai-xi-one.vercel.app/api/analyze-resume';
-    }
-    // Fallback to production URL if not in browser
-    return 'https://resume-ai-xi-one.vercel.app/api/analyze-resume';
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
-
-    setIsLoading(true);
-    try {
-      const response = await fetch(getApiUrl(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question: message }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
-
-      const data = await response.json();
-      setResponse(data.answer || "I apologize, but I couldn't process your question. Please try rephrasing it or ask one of the suggested questions.");
-    } catch (error) {
-      setResponse("I apologize, but I encountered an error processing your question. Please try again later or ask one of the suggested questions.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const chatRef = useRef<DeepChatElement | null>(null);
 
   const handleSuggestionClick = (suggestion: string) => {
-    setMessage(suggestion);
-    setResponse(''); // Clear previous response
-    // Trigger form submission after a small delay to ensure state is updated
-    setTimeout(() => {
-      formRef.current?.requestSubmit();
-    }, 0);
+    chatRef.current?.submitUserMessage({ text: suggestion });
+  };
+
+  const handleClearChat = () => {
+    chatRef.current?.clearMessages(true);
   };
 
   return (
@@ -73,91 +114,64 @@ const AskMeAnything = () => {
         Ask Anything About Me
       </h2>
       <div className="relative max-w-2xl mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 rounded-lg blur opacity-30 animate-gradient-x"></div>
-        <form ref={formRef} onSubmit={handleSubmit} className="relative bg-white/5 rounded-lg p-4 sm:p-6">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {questionSuggestions.map((suggestion, index) => (
-              <motion.button
-                key={suggestion}
-                type="button"
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 hover:text-white transition-all"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                {suggestion}
-              </motion.button>
-            ))}
-          </div>
-          <textarea
-            value={message}
-            onChange={(e) => {
-              setMessage(e.target.value);
-              setResponse(''); // Clear response when typing
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                formRef.current?.requestSubmit();
-              }
-            }}
-            placeholder="Type your message here..."
-            className="w-full h-28 sm:h-32 bg-white/5 border border-white/10 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="mt-4 flex items-center gap-3">
+        <div className="relative bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6 ask-me-anything">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap gap-2">
+              {questionSuggestions.map((suggestion, index) => (
+                <motion.button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 hover:text-white transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  {suggestion}
+                </motion.button>
+              ))}
+            </div>
             <motion.button
-              type="submit"
-              disabled={isLoading || !message.trim()}
-              className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              type="button"
+              onClick={handleClearChat}
+              title="Clear conversation"
+              aria-label="Clear conversation"
+              className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-gray-400 hover:text-white transition-all shrink-0"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Send className="w-5 h-5 mr-2" />
-              Get AI Response
+              <RotateCcw className="w-4 h-4" />
             </motion.button>
+          </div>
+          <DeepChat
+            ref={(el: DeepChatElement | null) => {
+              if (el) el.auxiliaryStyle = chatStyles;
+              chatRef.current = el;
+            }}
+            style={{ height: '460px', width: '100%', display: 'block', fontFamily: 'inherit', background: 'transparent' }}
+            connect={{
+              url: '/api/chat',
+              method: 'POST',
+              stream: true,
+            }}
+            requestBodyLimits={{ maxMessages: 12 }}
+            browserStorage={{ key: 'ask-me-anything-thread' }}
+            textInput={{ placeholder: { text: 'Type your message here...' } }}
+            errorMessages={{ displayServiceErrorMessages: true }}
+            auxiliaryStyle={chatStyles}
+          />
+          <div className="mt-3 flex items-center gap-3">
             <span className="text-xs text-gray-400 flex items-center gap-1">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
               Instant Response
             </span>
           </div>
-        </form>
-
-        <AnimatePresence>
-          {(response || isLoading) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mt-6 relative"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-lg blur opacity-30 animate-gradient-x"></div>
-              <div className="relative bg-white/5 rounded-lg p-6">
-                <div className="flex items-start gap-3">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg">
-                    <Bot className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                      </div>
-                    ) : (
-                      <p className="text-gray-300">{response}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </div>
       </div>
     </motion.div>
   );
 };
 
-export default AskMeAnything; 
+export default AskMeAnything;
