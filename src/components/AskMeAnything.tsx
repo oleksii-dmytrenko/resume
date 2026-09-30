@@ -2,9 +2,10 @@ import { motion } from 'framer-motion';
 import { DeepChat } from 'deep-chat-react';
 import type { DeepChat as DeepChatElement } from 'deep-chat';
 import { RotateCcw } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
+import type { MutableRefObject } from 'react';
 
-// keep in sync with the height transition on the DeepChat host style
+// keep in sync with the height transition on the chat area wrapper style
 const EXPAND_TRANSITION_MS = 350;
 
 const questionSuggestions = [
@@ -108,6 +109,49 @@ const chatStyles = `
   .loading-message-dots-container { --loading-message-color: #60a5fa; }
 `;
 
+// deep-chat rebuilds its whole internal DOM (replaceChildren) every time any
+// property is assigned, and @lit/react re-assigns every element property on
+// each React re-render without dirty-checking. So the <DeepChat> subtree must
+// never re-render while a request is streaming, or the stream writes into the
+// detached old internals and the answer is silently lost (the quick-question
+// pill bug: expand + submit in one tick used to rebuild the chat right after
+// the fetch started). Keep all object configs at module scope and isolate the
+// element behind React.memo; the expand/collapse height transition lives on
+// the wrapper div below, whose style React manages natively.
+const chatConnect = { url: '/api/chat', method: 'POST', stream: true };
+const chatRequestBodyLimits = { maxMessages: 12 };
+const chatBrowserStorage = { key: 'ask-me-anything-thread' };
+const chatTextInput = { placeholder: { text: 'Type your message here...' } };
+const chatErrorMessages = { displayServiceErrorMessages: true };
+
+const ChatBox = memo(function ChatBox({
+  chatRef,
+}: {
+  chatRef: MutableRefObject<DeepChatElement | null>;
+}) {
+  return (
+    <DeepChat
+      ref={(el: DeepChatElement | null) => {
+        if (el) el.auxiliaryStyle = chatStyles;
+        chatRef.current = el;
+      }}
+      style={{
+        height: '100%',
+        width: '100%',
+        display: 'block',
+        fontFamily: 'inherit',
+        background: 'transparent',
+      }}
+      connect={chatConnect}
+      requestBodyLimits={chatRequestBodyLimits}
+      browserStorage={chatBrowserStorage}
+      textInput={chatTextInput}
+      errorMessages={chatErrorMessages}
+      auxiliaryStyle={chatStyles}
+    />
+  );
+});
+
 const AskMeAnything = () => {
   const chatRef = useRef<DeepChatElement | null>(null);
   const chatAreaRef = useRef<HTMLDivElement | null>(null);
@@ -199,31 +243,16 @@ const AskMeAnything = () => {
               <RotateCcw className="w-4 h-4" />
             </motion.button>
           </div>
-          <div ref={chatAreaRef} onFocus={handleChatInteract} onInput={handleChatInteract}>
-            <DeepChat
-              ref={(el: DeepChatElement | null) => {
-                if (el) el.auxiliaryStyle = chatStyles;
-                chatRef.current = el;
-              }}
-              style={{
-                height: expanded ? 'min(520px, 70vh)' : 'min(210px, 35vh)',
-                transition: `height ${EXPAND_TRANSITION_MS}ms ease`,
-                width: '100%',
-                display: 'block',
-                fontFamily: 'inherit',
-                background: 'transparent',
-              }}
-              connect={{
-                url: '/api/chat',
-                method: 'POST',
-                stream: true,
-              }}
-              requestBodyLimits={{ maxMessages: 12 }}
-              browserStorage={{ key: 'ask-me-anything-thread' }}
-              textInput={{ placeholder: { text: 'Type your message here...' } }}
-              errorMessages={{ displayServiceErrorMessages: true }}
-              auxiliaryStyle={chatStyles}
-            />
+          <div
+            ref={chatAreaRef}
+            onFocus={handleChatInteract}
+            onInput={handleChatInteract}
+            style={{
+              height: expanded ? 'min(520px, 70vh)' : 'min(210px, 35vh)',
+              transition: `height ${EXPAND_TRANSITION_MS}ms ease`,
+            }}
+          >
+            <ChatBox chatRef={chatRef} />
           </div>
           <div className="mt-3 flex items-center gap-3">
             <span className="text-xs text-gray-400 flex items-center gap-1">
