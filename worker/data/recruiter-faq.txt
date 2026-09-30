@@ -1,0 +1,147 @@
+================================================================================
+OLEK DMYTRENKO — RECRUITER FAQ / KNOWLEDGE BASE
+Companion to the resume: standardized answers to the screening questions
+recruiters ask most often on LinkedIn, compiled from real recruiter chats.
+
+Note: this file feeds the public resume chat at cv.olektech.com — anything
+here can be quoted in an answer. Last updated: 2026-09.
+================================================================================
+
+--------------------------------------------------------------------------------
+QUICK CHECKLIST — one-line answers recruiters usually want
+--------------------------------------------------------------------------------
+
+Salary expectations .............. from $5,000 USD / month (gross equivalent)
+Notice period .................... 2–3 weeks
+Current location ................. Albania (remote-first, flexible)
+English .......................... fluent — daily working language
+Commercial Python ................ 5+ years
+Backend engineering overall ...... 7+ years (incl. microservices)
+GenAI / LLM in production ........ 1.5+ years hands-on
+Agentic frameworks ............... LangGraph (primary), LangChain
+RAG architecture ................. yes, practical production experience
+Autonomous agents in production .. yes (tool choice, planning, retries)
+AI coding tools .................. Cursor + Claude Code, daily
+AWS ................................ yes — main platform; AWS + Terraform core stack
+Graph databases .................. limited: some Neo4j, understands concepts
+Frontend tasks ................... comfortable taking them
+Presales / discovery / prototypes  yes
+CV ................................ cv.olektech.com
+Contract format .................. Ukrainian FOP (sole proprietor) or gig/B2B
+
+--------------------------------------------------------------------------------
+1. COMPENSATION & CONTRACT FORMAT
+--------------------------------------------------------------------------------
+- Rate expectations: starting from $5,000 USD/month (gross equivalent),
+  flexible upward depending on role, scope and project.
+- Contract format: works as a contractor through a Ukrainian FOP (sole
+  proprietorship); equally comfortable with gig contracts or B2B
+  arrangements.
+
+--------------------------------------------------------------------------------
+2. AVAILABILITY
+--------------------------------------------------------------------------------
+- Notice period: 2–3 weeks; a concrete start date can usually be aligned
+  quickly.
+
+--------------------------------------------------------------------------------
+3. LOCATION, TIMEZONE & WORK FORMAT
+--------------------------------------------------------------------------------
+- Currently based in Albania; works fully remote.
+- Comfortable across European timezones.
+- Comfortable with US timezones as well: ~5 hours ahead of US East, and
+  evenings are his most productive hours, so overlap works well. Multiple
+  years of experience working with US teams while living in Europe.
+
+--------------------------------------------------------------------------------
+4. ENGLISH
+--------------------------------------------------------------------------------
+- Fluent spoken and written English; it is the everyday working language
+  with international clients and stakeholders.
+
+--------------------------------------------------------------------------------
+5. EXPERIENCE SNAPSHOT
+--------------------------------------------------------------------------------
+- 7+ years of backend engineering in total, including microservices
+  architecture.
+- 5+ years of commercial Python.
+- 1.5+ years of hands-on commercial GenAI/LLM work in production projects.
+
+--------------------------------------------------------------------------------
+6. AGENTIC AI, LANGGRAPH & AUTONOMOUS SYSTEMS
+--------------------------------------------------------------------------------
+- Builds agents primarily with LangGraph; also hands-on with LangChain and
+  familiar with similar agentic frameworks (CrewAI, DeepAgents class of
+  tools).
+- Production experience with systems where the agent acted autonomously:
+  choosing tools, planning next steps, retrying failed actions.
+- Multi-agent systems are a deliberate cost tradeoff, not a knowledge gap:
+  * For user-facing production flows he keeps architectures cost-efficient,
+    because multi-agent decision-making loops can cost roughly 10x more.
+  * He has experimented with more complex patterns: orchestrator, swarm,
+    generator-critic loops.
+  * The complex patterns run in internal (non-user-facing) agents — code
+    review, processing and merging changes, closing tickets — one-off
+    operations where the cost per run matters less.
+
+--------------------------------------------------------------------------------
+7. RAG & INTEGRATING LLMs INTO PRODUCTS
+--------------------------------------------------------------------------------
+- Practical experience building RAG architectures and integrating AI/LLMs
+  into applications and products. This very resume site runs a LangGraph
+  agent on Cloudflare Workers.
+
+--------------------------------------------------------------------------------
+8. AI CODING TOOLS IN THE DAILY WORKFLOW
+--------------------------------------------------------------------------------
+- Daily drivers: Cursor and Claude Code; constantly experiments with other
+  AI dev tools as they appear.
+- The majority of day-to-day development work is AI-assisted — code
+  generation, review, tests, docs, communication.
+
+--------------------------------------------------------------------------------
+9. CLOUD & INFRASTRUCTURE
+--------------------------------------------------------------------------------
+- AWS is the main platform; AWS + Terraform is the core stack.
+- Also familiar with GCP.
+
+--------------------------------------------------------------------------------
+10. DATABASES
+--------------------------------------------------------------------------------
+- Strong with SQL and vector databases (the ones used for RAG).
+- Graph databases: limited hands-on — a small amount of Neo4j on an ML
+  project; understands the concepts, but would not claim deep production
+  experience.
+
+--------------------------------------------------------------------------------
+11. FRONTEND
+--------------------------------------------------------------------------------
+- Totally comfortable picking up frontend tasks when needed (React +
+  TypeScript; this site is his own work).
+
+--------------------------------------------------------------------------------
+12. PRESALES, DISCOVERY & PROTOTYPES
+--------------------------------------------------------------------------------
+- Yes — experience in presales/discovery projects and in building
+  prototypes from scratch.
+
+--------------------------------------------------------------------------------
+13. LLM COST ECONOMICS (talking point that comes up in interviews)
+--------------------------------------------------------------------------------
+- Rule of thumb: LLM budget = average operations per user x cost per
+  operation.
+- His current product serves price-sensitive users (students, people
+  between jobs) at a ~$50/month price point. They tolerate occasional
+  imperfect recommendations, so user-facing flows deliberately use cheaper,
+  simpler agent architectures.
+- Two other viable models: growth-stage startups that subsidize unit costs
+  to win users, and products creating large enterprise value
+  (Palantir-style) where the value justifies expensive pipelines.
+
+--------------------------------------------------------------------------------
+14. LINKS & CV
+--------------------------------------------------------------------------------
+- CV / resume site: https://cv.olektech.com
+- Email: o@olektech.com
+- GitHub: https://github.com/oleksii-dmytrenko
+- LinkedIn: https://www.linkedin.com/in/olek-dmytrenko-606953b1/
