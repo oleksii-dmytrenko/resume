@@ -2,6 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import ForkMeRibbon from './components/ForkMeRibbon';
 import Navigation from './components/Navigation';
 import AboutMe from './pages/AboutMe';
 import Experience from './pages/Experience';
@@ -28,6 +29,7 @@ function App() {
       <AnalyticsPageViewTracker />
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
         <Navigation />
+        <ForkMeRibbon />
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<AboutMe />} />
