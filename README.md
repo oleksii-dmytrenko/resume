@@ -1,51 +1,59 @@
-# Personal Resume Website
+# 👋 Olek's Resume — with a built-in AI me
 
-My AI-enhanced personal resume website. Visit [cv.olektech.com](https://cv.olektech.com/) to see it in action.
+🚀 My personal resume site at [cv.olektech.com](https://cv.olektech.com/) — with **"Ask Anything About Me"**,
+a chat that answers questions about my experience using an AI agent that has actually read my CV.
 
-## Architecture
+[🌐 Live site](https://cv.olektech.com) | [🐙 My GitHub](https://github.com/oleksii-dmytrenko) | [💼 LinkedIn](https://www.linkedin.com/in/olek-dmytrenko-606953b1/) | [📧 o@olektech.com](mailto:o@olektech.com)
 
-A single Cloudflare Worker serves everything:
+---
 
-- **Frontend** — React + TypeScript + Vite SPA (Tailwind, framer-motion), served as
-  static assets by the Worker (`/`, `/expertise`, `/experience`, `/why-me`).
-- **`POST /api/chat`** — Hono route running a LangGraph agent backed by Anthropic
-  (`claude-sonnet-4-5`). The agent has a `load_resume` tool that fetches the resume
-  from Google Docs (cached in the Workers Cache API). Replies stream to the UI as
-  SSE `data: {"text": ...}` events, rendered by the [deep-chat](https://deepchat.dev)
-  chat widget with visible conversation history.
-- **Provider seam** — `worker/ai/model.ts` is the only file that knows which LLM
-  provider is used; swapping providers is a one-function edit.
-- **Infrastructure as code** — `terraform/main.tf` manages the `cv.olektech.com`
-  custom domain (zero variables; auth via `CLOUDFLARE_API_TOKEN` env var). The
-  Worker itself is deployed by `wrangler` from `wrangler.jsonc`. The Anthropic key
-  is stored only as an encrypted Cloudflare Worker secret — never in the repo,
-  tfvars, or Terraform state.
+## ✨ What's inside
 
-## Local development
+- 🗣️ **AI chat** — ask about my experience, skills, availability or timezone; answers stream in real time
+- 📄 **Grounded answers** — the agent looks facts up from my CV via a `load_resume` tool instead of guessing
+- 📱 **One page, four views** — About Me, Expertise, Experience and Why Me, with smooth transitions
+- ⚡ **Fast & simple** — a single Cloudflare Worker serves both the site and the chat API, no extra backend to babysit
+
+---
+
+## 🛠️ Tech Stack
+
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Framer](https://img.shields.io/badge/Framer-0055FF?style=for-the-badge&logo=framer&logoColor=white)
+
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
+![Hono](https://img.shields.io/badge/Hono-E36002?style=for-the-badge&logo=hono&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-000000?style=for-the-badge&logo=langchain&logoColor=white)
+![Claude](https://img.shields.io/badge/Claude-191919?style=for-the-badge&logo=anthropic&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-623CE4?style=for-the-badge&logo=terraform&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+
+**Frontend:** React + TypeScript + Vite, Tailwind, framer-motion, [deep-chat](https://deepchat.dev)
+**AI:** LangGraph agent · Claude (Anthropic) · streamed replies over SSE
+**Infra:** Cloudflare Workers + static assets · Hono routes · Terraform for the custom domain
+
+---
+
+## 🚀 Run it locally
 
 ```bash
 cp .dev.vars.example .dev.vars   # add your ANTHROPIC_API_KEY
 npm install
-npm run dev                      # builds once, then runs vite (5173) + wrangler dev (8787)
+npm run dev                      # UI on http://localhost:5173, worker on :8787
 ```
 
-Vite proxies `/api` to the worker, so http://localhost:5173 is the full stack.
+The UI proxies chat requests to the worker, so `localhost:5173` is the full stack.
 
-## Deploy
+## 📦 Deploy
 
 ```bash
-npm run deploy                   # builds the SPA and deploys the Worker + assets
+npm run deploy                   # builds the site and ships the Worker
 ```
 
-Pushes to `main` deploy automatically via GitHub Actions.
+Pushes to `main` deploy automatically via GitHub Actions. The Anthropic key lives only as an
+encrypted Cloudflare secret — never in the repo.
 
-### One-time bootstrap
-
-```bash
-npm run deploy                          # creates the "resume" Worker
-wrangler secret put ANTHROPIC_API_KEY   # encrypted by Cloudflare
-cd terraform && terraform init && CLOUDFLARE_API_TOKEN=... terraform apply   # custom domain
-```
-
-Before applying the custom domain, detach `cv.olektech.com` from the old Cloudflare
-Pages project (kept only as a rollback until the Worker is verified).
+> *"Build fast. Learn faster. Iterate always."*

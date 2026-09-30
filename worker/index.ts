@@ -8,8 +8,20 @@ const APOLOGY =
   "I apologize, but I encountered an error processing your question. Please try again later.";
 
 interface ChatMessage {
-  role: "user" | "assistant";
+  role: "user" | "ai" | "assistant";
   text: string;
+}
+
+// deep-chat sends assistant messages with role "ai"; accept both spellings so
+// past answers stay in the history the model sees.
+function isChatMessage(m: unknown): m is ChatMessage {
+  if (!m || typeof m !== "object") return false;
+  const { role, text } = m as { role?: unknown; text?: unknown };
+  return (
+    (role === "user" || role === "ai" || role === "assistant") &&
+    typeof text === "string" &&
+    text.trim().length > 0
+  );
 }
 
 function toLangChainMessages(messages: ChatMessage[]): BaseMessageLike[] {
@@ -87,14 +99,8 @@ function extractTextDelta(chunk: unknown, state: StreamRoleState): string {
 const app = new Hono<{ Bindings: Env }>();
 
 app.post("/api/chat", async (c) => {
-  const body = await c.req.json< { messages?: ChatMessage[] } >().catch(() => null);
-  const messages = (body?.messages ?? []).filter(
-    (m) =>
-      m &&
-      (m.role === "user" || m.role === "assistant") &&
-      typeof m.text === "string" &&
-      m.text.trim().length > 0
-  );
+  const body = await c.req.json< { messages?: unknown[] } >().catch(() => null);
+  const messages = (body?.messages ?? []).filter(isChatMessage);
 
   if (messages.length === 0 || messages[messages.length - 1].role !== "user") {
     return c.json(

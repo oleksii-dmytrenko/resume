@@ -2,7 +2,10 @@ import { motion } from 'framer-motion';
 import { DeepChat } from 'deep-chat-react';
 import type { DeepChat as DeepChatElement } from 'deep-chat';
 import { RotateCcw } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+// keep in sync with the height transition on the DeepChat host style
+const EXPAND_TRANSITION_MS = 350;
 
 const questionSuggestions = [
   "What is your experience with AI?",
@@ -14,7 +17,9 @@ const questionSuggestions = [
 // match the component's internal structure and must be set as a property -
 // React passes string props to custom elements as attributes, which deep-chat
 // ignores. Colors/typography mirror the site: white/5 cards, white/10 borders,
-// blue-500 -> purple-600 accents, gray-200/300 text, system-ui font.
+// blue-500 -> purple-600 accents, gray-200/300 text, system-ui font. The input
+// is sized like modern chatbots (ChatGPT et al): full-width container, 1rem
+// text with generous padding, and an oversized gradient submit button.
 const chatStyles = `
   :host {
     background-color: transparent;
@@ -71,18 +76,29 @@ const chatStyles = `
   #text-input-container {
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    border-radius: 14px;
+    width: 100%;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
   }
   #text-input-container:focus-within {
     border-color: rgba(59, 130, 246, 0.6);
   }
-  #text-input { color: #ffffff; }
+  #text-input {
+    color: #ffffff;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 12px 16px;
+  }
   #text-input span { color: #9ca3af; }
 
   .input-button-svg {
     background: linear-gradient(90deg, #3b82f6, #9333ea);
-    border-radius: 10px;
+    border-radius: 12px;
+    width: 1.9em;
+    height: 1.9em;
   }
+  .input-button { border-radius: 12px; }
   .input-button-svg svg { fill: #ffffff; }
   .input-button.disabled-button .input-button-svg {
     background: rgba(255, 255, 255, 0.08);
@@ -94,14 +110,52 @@ const chatStyles = `
 
 const AskMeAnything = () => {
   const chatRef = useRef<DeepChatElement | null>(null);
+  const chatAreaRef = useRef<HTMLDivElement | null>(null);
+  const scrollTimerRef = useRef<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  // browserStorage restores past conversations before this effect runs; keep
+  // the chat tall for returning visitors instead of cramming history into the
+  // collapsed box.
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      if ((chatRef.current?.getMessages().length ?? 0) > 0) setExpanded(true);
+    }, 0);
+    return () => {
+      window.clearTimeout(id);
+      if (scrollTimerRef.current !== null) window.clearTimeout(scrollTimerRef.current);
+    };
+  }, []);
+
+  // The chat grows downward, so the input can end up below the fold. Once the
+  // height transition settles, jump the page just enough to bring the input
+  // back. The jump must be instant (not smooth): deep-chat snapshots
+  // window.scrollY on every keydown and rewinds it on the following input
+  // event (a Chromium caret workaround), so an animated page scroll between
+  // two keystrokes makes the page snap back and the caret look lost.
+  const expandChat = (refocusInput = false) => {
+    if (expanded) return;
+    setExpanded(true);
+    if (scrollTimerRef.current !== null) window.clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = window.setTimeout(() => {
+      chatAreaRef.current?.scrollIntoView({ block: 'nearest' });
+      if (refocusInput) chatRef.current?.focusInput();
+    }, EXPAND_TRANSITION_MS);
+  };
 
   const handleSuggestionClick = (suggestion: string) => {
+    expandChat();
     chatRef.current?.submitUserMessage({ text: suggestion });
   };
 
   const handleClearChat = () => {
+    setExpanded(false);
     chatRef.current?.clearMessages(true);
   };
+
+  // focusin/input originate inside deep-chat's shadow DOM but are composed,
+  // so they bubble through the host and can be caught here.
+  const handleChatInteract = () => expandChat(true);
 
   return (
     <motion.div
@@ -145,23 +199,32 @@ const AskMeAnything = () => {
               <RotateCcw className="w-4 h-4" />
             </motion.button>
           </div>
-          <DeepChat
-            ref={(el: DeepChatElement | null) => {
-              if (el) el.auxiliaryStyle = chatStyles;
-              chatRef.current = el;
-            }}
-            style={{ height: '460px', width: '100%', display: 'block', fontFamily: 'inherit', background: 'transparent' }}
-            connect={{
-              url: '/api/chat',
-              method: 'POST',
-              stream: true,
-            }}
-            requestBodyLimits={{ maxMessages: 12 }}
-            browserStorage={{ key: 'ask-me-anything-thread' }}
-            textInput={{ placeholder: { text: 'Type your message here...' } }}
-            errorMessages={{ displayServiceErrorMessages: true }}
-            auxiliaryStyle={chatStyles}
-          />
+          <div ref={chatAreaRef} onFocus={handleChatInteract} onInput={handleChatInteract}>
+            <DeepChat
+              ref={(el: DeepChatElement | null) => {
+                if (el) el.auxiliaryStyle = chatStyles;
+                chatRef.current = el;
+              }}
+              style={{
+                height: expanded ? 'min(520px, 70vh)' : 'min(210px, 35vh)',
+                transition: `height ${EXPAND_TRANSITION_MS}ms ease`,
+                width: '100%',
+                display: 'block',
+                fontFamily: 'inherit',
+                background: 'transparent',
+              }}
+              connect={{
+                url: '/api/chat',
+                method: 'POST',
+                stream: true,
+              }}
+              requestBodyLimits={{ maxMessages: 12 }}
+              browserStorage={{ key: 'ask-me-anything-thread' }}
+              textInput={{ placeholder: { text: 'Type your message here...' } }}
+              errorMessages={{ displayServiceErrorMessages: true }}
+              auxiliaryStyle={chatStyles}
+            />
+          </div>
           <div className="mt-3 flex items-center gap-3">
             <span className="text-xs text-gray-400 flex items-center gap-1">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
