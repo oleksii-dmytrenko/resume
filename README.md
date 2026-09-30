@@ -12,6 +12,7 @@ a chat that answers questions about my experience using an AI agent that has act
 - 🗣️ **AI chat** — ask about my experience, skills, availability or timezone; answers stream in real time
 - 📄 **Grounded answers** — the agent looks facts up from my CV via a `load_resume` tool instead of guessing
 - 🧠 **Recruiter FAQ knowledge base** — screening questions (rate, notice period, location, English, agentic experience) are answered from a plain-text FAQ compiled from real recruiter chats, served via a `load_faq` tool
+- 🛡️ **Scope guardrails** — the agent answers only about Olek's professional background and the personal context he has published; general questions, coding help, and prompt-injection or persona-hijack attempts get a one-line friendly redirect
 - 📱 **One page, four views** — About Me, Expertise, Experience and Why Me, with smooth transitions
 - ⚡ **Fast & simple** — a single Cloudflare Worker serves both the site and the chat API, no extra backend to babysit
 
