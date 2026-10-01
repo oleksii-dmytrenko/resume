@@ -1,4 +1,5 @@
 export interface Env {
   ANTHROPIC_API_KEY: string;
   ASSETS: Fetcher;
+  DB: D1Database;
 }

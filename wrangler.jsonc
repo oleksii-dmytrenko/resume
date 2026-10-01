@@ -13,6 +13,17 @@
   "observability": {
     "enabled": true
   },
+  // Chat transcript storage. database_id comes from terraform:
+  // `terraform apply` creates resume-chats, then paste
+  // `terraform output -raw resume_chats_database_id` here (local dev works
+  // with the placeholder).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "resume-chats",
+      "database_id": "12d41ae3-dc7b-4d10-bcbb-91d6ad5ea544"
+    }
+  ],
   "rules": [
     { "type": "Text", "globs": ["**/*.txt"], "fallthrough": true }
   ]
