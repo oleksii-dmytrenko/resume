@@ -54,19 +54,10 @@ The UI proxies chat requests to the worker, so `localhost:5173` is the full stac
 ## 💾 Chat transcripts (Cloudflare D1)
 
 Every turn of the "Ask Anything" chat is stored in the `resume-chats` D1
-database. Two tables:
-
-- **`chat_messages`** — one row per message: `session_id` (a 90-day `chat_sid`
-  cookie groups a visitor's turns into one conversation), `role`, `text`, UTC
-  `created_at`.
-- **`chat_visitors`** — one row per conversation with what the request
-  reveals: IP, Cloudflare geo (`country`, `region`, `city`, `latitude`/
-  `longitude`, `timezone`, `asn`/`as_organization`, `colo` edge datacenter),
-  parsed `browser` and `os` (raw `user_agent` kept for exact re-parsing), and
-  `language`. Refreshed on every turn; `first_seen`/`last_seen` bracket the
-  conversation.
-
-Writes are fire-and-forget — a DB outage never breaks the chat itself.
+database (table `chat_messages`): one row per message, with `session_id`
+(a 90-day `chat_sid` cookie groups a visitor's turns into one conversation),
+`role`, `text` and a UTC `created_at`. Writes are fire-and-forget — a DB
+outage never breaks the chat itself.
 
 One-time setup (requires `CLOUDFLARE_API_TOKEN` in the environment, see
 `terraform/main.tf`):
@@ -94,10 +85,6 @@ npx wrangler d1 execute resume-chats --remote --command \
 # most frequently asked questions
 npx wrangler d1 execute resume-chats --remote --command \
   "SELECT lower(text) AS question, count(*) AS asks FROM chat_messages WHERE role='user' GROUP BY lower(text) ORDER BY asks DESC LIMIT 10"
-
-# recent visitors with geo/browser and their message count
-npx wrangler d1 execute resume-chats --remote --command \
-  "SELECT v.country, v.city, v.browser, v.os, v.ip, v.last_seen, count(m.id) AS messages FROM chat_visitors v JOIN chat_messages m ON m.session_id = v.session_id GROUP BY v.session_id ORDER BY v.last_seen DESC LIMIT 10"
 ```
 
 (Drop `--remote` to inspect the local dev database.)
