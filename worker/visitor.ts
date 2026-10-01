@@ -10,18 +10,13 @@ import type { Env } from "./env";
 // re-derived exactly later.
 function parseUserAgent(ua: string): { browser: string | null; os: string | null } {
   const { browser, os } = new UAParser(ua).getResult();
-  const browserBucket = browser.name
-    ? `${browser.name}${browser.major ? ` ${browser.major}` : ""}`
-    : null;
-  const osVersionMajor = os.version?.split(".")[0];
-  // Safari freezes the macOS UA at "Mac OS X 10_15_7" forever, so the
-  // version would mislabel every modern Mac - keep the name only.
-  const osBucket = os.name
-    ? os.name === "Mac OS"
-      ? "macOS"
-      : `${os.name}${osVersionMajor ? ` ${osVersionMajor}` : ""}`
-    : null;
-  return { browser: browserBucket, os: osBucket };
+  // Safari freezes the macOS UA at "Mac OS X 10_15_7" forever - keeping the
+  // version would mislabel every modern Mac.
+  const osName = os.name === "Mac OS" ? "macOS" : os.name;
+  return {
+    browser: [browser.name, browser.major].filter(Boolean).join(" ") || null,
+    os: [osName, os.version?.split(".")[0]].filter(Boolean).join(" ") || null,
+  };
 }
 
 function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
@@ -42,8 +37,7 @@ function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
     colo: cf?.colo ?? null,
     userAgent: userAgent || null,
     browser: parsed.browser,
-    // sec-ch-ua-platform (low-entropy client hint) as an OS fallback
-    os: parsed.os ?? header("sec-ch-ua-platform") ?? null,
+    os: parsed.os,
     language: header("accept-language")?.split(",")[0].trim() || null,
   };
 }

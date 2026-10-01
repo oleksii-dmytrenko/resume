@@ -11,7 +11,6 @@ const APOLOGY =
 
 const SESSION_COOKIE = "chat_sid";
 const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 90; // 90 days
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface ChatMessage {
   role: "user" | "ai" | "assistant";
@@ -136,7 +135,7 @@ app.post("/api/chat", async (c) => {
   // message is persisted - exactly once per turn. A uuid cookie groups turns
   // from the same browser into one conversation without client changes.
   const cookieSid = getCookie(c, SESSION_COOKIE);
-  const sessionId = UUID_RE.test(cookieSid ?? "") ? cookieSid! : crypto.randomUUID();
+  const sessionId = cookieSid ?? crypto.randomUUID();
 
   c.executionCtx.waitUntil(
     recordMessage(c.env, sessionId, "user", messages[messages.length - 1].text)
