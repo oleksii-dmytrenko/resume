@@ -1,38 +1,27 @@
+import { UAParser } from "ua-parser-js";
 import type { Context } from "hono";
 import type { Env } from "./env";
 
-// Coarse UA sniffing - only needs to be right about the common browsers so
-// visitors group into "Chrome 130 on Windows"-style buckets. The raw
-// user_agent column keeps the source string, so anything mis-parsed can be
-// re-derived exactly later. Order matters: Edge/Opera/Samsung all include a
-// Chrome token, and Chrome UAs include a Safari token.
-function parseBrowser(ua: string): string {
-  const rules: [string, RegExp][] = [
-    ["Edge", /Edg(?:e|A|iOS)?\/([\d.]+)/],
-    ["Opera", /(?:OPR|Opera)[\s/]([\d.]+)/],
-    ["Samsung Internet", /SamsungBrowser\/([\d.]+)/],
-    ["Firefox", /(?:Firefox|FxiOS)\/([\d.]+)/],
-    ["Chrome", /(?:Chrome|CriOS)\/([\d.]+)/],
-    ["Safari", /Version\/([\d.]+)\sSafari/],
-  ];
-  for (const [name, re] of rules) {
-    const match = ua.match(re);
-    if (match) return `${name} ${parseInt(match[1], 10)}`;
-  }
-  return "";
-}
-
-function parseOs(ua: string): string {
-  if (/Windows NT/.test(ua)) return "Windows";
-  const android = ua.match(/Android\s([\d.]+)/);
-  if (android) return `Android ${android[1].split(".")[0]}`;
-  if (/iPhone|iPad|iPod/.test(ua)) {
-    const ios = ua.match(/OS\s(\d+[_.]\d+)/);
-    return ios ? `iOS ${ios[1].replace("_", ".")}` : "iOS";
-  }
-  if (/Mac OS X/.test(ua)) return "macOS";
-  if (/\bLinux\b|X11/.test(ua)) return "Linux";
-  return "";
+// ua-parser-js is pinned to ^1 deliberately: from v2 the library is
+// AGPLv3/commercial dual-licensed, while v1 stays MIT.
+//
+// Buckets stay deliberately coarse ("Chrome 130", "Windows") - the raw
+// user_agent column keeps the source string, so anything mis-bucketed can be
+// re-derived exactly later.
+function parseUserAgent(ua: string): { browser: string | null; os: string | null } {
+  const { browser, os } = new UAParser(ua).getResult();
+  const browserBucket = browser.name
+    ? `${browser.name}${browser.major ? ` ${browser.major}` : ""}`
+    : null;
+  const osVersionMajor = os.version?.split(".")[0];
+  // Safari freezes the macOS UA at "Mac OS X 10_15_7" forever, so the
+  // version would mislabel every modern Mac - keep the name only.
+  const osBucket = os.name
+    ? os.name === "Mac OS"
+      ? "macOS"
+      : `${os.name}${osVersionMajor ? ` ${osVersionMajor}` : ""}`
+    : null;
+  return { browser: browserBucket, os: osBucket };
 }
 
 function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
@@ -44,6 +33,7 @@ function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
   const ip =
     header("cf-connecting-ip") ?? (forwarded ? forwarded.split(",")[0].trim() : null);
   const userAgent = header("user-agent") ?? "";
+  const parsed = parseUserAgent(userAgent);
   return {
     ip,
     country: cf?.country ?? null,
@@ -56,9 +46,9 @@ function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
     asOrganization: cf?.asOrganization ?? null,
     colo: cf?.colo ?? null,
     userAgent: userAgent || null,
-    browser: parseBrowser(userAgent) || null,
+    browser: parsed.browser,
     // sec-ch-ua-platform (low-entropy client hint) as an OS fallback
-    os: parseOs(userAgent) || header("sec-ch-ua-platform") || null,
+    os: parsed.os ?? header("sec-ch-ua-platform") ?? null,
     language: header("accept-language")?.split(",")[0].trim() || null,
   };
 }
