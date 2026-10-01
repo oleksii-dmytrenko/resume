@@ -3,6 +3,7 @@ import { AIMessage, HumanMessage, type BaseMessageLike } from "@langchain/core/m
 import { getCookie } from "hono/cookie";
 import { createAgent } from "./ai/agent";
 import type { Env } from "./env";
+import { recordVisitor } from "./visitor";
 
 const MAX_HISTORY_MESSAGES = 12;
 const APOLOGY =
@@ -146,6 +147,8 @@ app.post("/api/chat", async (c) => {
   c.executionCtx.waitUntil(
     recordMessage(c.env, sessionId, "user", messages[messages.length - 1].text)
   );
+  // request metadata (ip/geo/user-agent) per conversation, upserted each turn
+  c.executionCtx.waitUntil(recordVisitor(c, sessionId));
 
   const agent = createAgent(c.env);
   const stream = new ReadableStream({
