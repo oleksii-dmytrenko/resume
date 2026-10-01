@@ -6,34 +6,32 @@ import type { Env } from "./env";
 // AGPLv3/commercial dual-licensed, while v1 stays MIT. The raw user_agent
 // column keeps the source string, so anything mis-bucketed can be
 // re-derived exactly later.
-function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
-  const cf = c.req.raw.cf;
-  const header = (name: string) => c.req.header(name);
-  const userAgent = header("user-agent") ?? "";
-  const { browser, os } = new UAParser(userAgent).getResult();
-  return {
-    ip: header("cf-connecting-ip") ?? null,
-    country: cf?.country ?? null,
-    region: cf?.region ?? null,
-    city: cf?.city ?? null,
-    latitude: cf?.latitude ?? null,
-    longitude: cf?.longitude ?? null,
-    timezone: cf?.timezone ?? null,
-    asn: cf?.asn ?? null,
-    asOrganization: cf?.asOrganization ?? null,
-    colo: cf?.colo ?? null,
-    userAgent: userAgent || null,
-    browser: browser.name ?? null,
-    // v1 labels macOS "Mac OS"; the modern name reads better in queries
-    os: os.name === "Mac OS" ? "macOS" : os.name ?? null,
-    language: header("accept-language")?.split(",")[0].trim() || null,
-  };
-}
 
 // Upserted on every turn: first_seen sticks from the insert, everything else
 // refreshes so a returning visitor on a new network/browser shows the latest.
 function recordVisitor(c: Context<{ Bindings: Env }>, sessionId: string): Promise<D1Result> {
-  const v = collectVisitorInfo(c);
+  const cf = c.req.raw.cf;
+  const header = (name: string) => c.req.header(name);
+  const { browser, os } = new UAParser(header("user-agent") ?? "").getResult();
+  // row key order must match the INSERT column order; Object.values feeds
+  // bind() with undefined normalized to null (D1 rejects undefined)
+  const row = {
+    ip: header("cf-connecting-ip"),
+    country: cf?.country,
+    region: cf?.region,
+    city: cf?.city,
+    latitude: cf?.latitude,
+    longitude: cf?.longitude,
+    timezone: cf?.timezone,
+    asn: cf?.asn,
+    asOrganization: cf?.asOrganization,
+    colo: cf?.colo,
+    userAgent: header("user-agent"),
+    browser: browser.name,
+    // v1 labels macOS "Mac OS"; the modern name reads better in queries
+    os: os.name === "Mac OS" ? "macOS" : os.name,
+    language: header("accept-language")?.split(",")[0].trim(),
+  };
   return c.env.DB.prepare(
     `INSERT INTO chat_visitors
        (session_id, ip, country, region, city, latitude, longitude, timezone,
@@ -49,11 +47,7 @@ function recordVisitor(c: Context<{ Bindings: Env }>, sessionId: string): Promis
        language = excluded.language,
        last_seen = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`
   )
-    .bind(
-      sessionId, v.ip, v.country, v.region, v.city, v.latitude, v.longitude,
-      v.timezone, v.asn, v.asOrganization, v.colo, v.userAgent, v.browser,
-      v.os, v.language
-    )
+    .bind(sessionId, ...Object.values(row).map((v) => v ?? null))
     .run();
 }
 
