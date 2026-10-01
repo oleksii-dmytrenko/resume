@@ -3,27 +3,14 @@ import type { Context } from "hono";
 import type { Env } from "./env";
 
 // ua-parser-js is pinned to ^1 deliberately: from v2 the library is
-// AGPLv3/commercial dual-licensed, while v1 stays MIT.
-//
-// Buckets stay deliberately coarse ("Chrome 130", "Windows") - the raw
-// user_agent column keeps the source string, so anything mis-bucketed can be
+// AGPLv3/commercial dual-licensed, while v1 stays MIT. The raw user_agent
+// column keeps the source string, so anything mis-bucketed can be
 // re-derived exactly later.
-function parseUserAgent(ua: string): { browser: string | null; os: string | null } {
-  const { browser, os } = new UAParser(ua).getResult();
-  // Safari freezes the macOS UA at "Mac OS X 10_15_7" forever - keeping the
-  // version would mislabel every modern Mac.
-  const osName = os.name === "Mac OS" ? "macOS" : os.name;
-  return {
-    browser: [browser.name, browser.major].filter(Boolean).join(" ") || null,
-    os: [osName, os.version?.split(".")[0]].filter(Boolean).join(" ") || null,
-  };
-}
-
 function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
   const cf = c.req.raw.cf;
   const header = (name: string) => c.req.header(name);
   const userAgent = header("user-agent") ?? "";
-  const parsed = parseUserAgent(userAgent);
+  const { browser, os } = new UAParser(userAgent).getResult();
   return {
     ip: header("cf-connecting-ip") ?? null,
     country: cf?.country ?? null,
@@ -36,8 +23,9 @@ function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
     asOrganization: cf?.asOrganization ?? null,
     colo: cf?.colo ?? null,
     userAgent: userAgent || null,
-    browser: parsed.browser,
-    os: parsed.os,
+    browser: browser.name ?? null,
+    // v1 labels macOS "Mac OS"; the modern name reads better in queries
+    os: os.name === "Mac OS" ? "macOS" : os.name ?? null,
     language: header("accept-language")?.split(",")[0].trim() || null,
   };
 }
