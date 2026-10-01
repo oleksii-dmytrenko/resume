@@ -3,6 +3,7 @@ import { AIMessage, HumanMessage, type BaseMessageLike } from "@langchain/core/m
 import { getCookie } from "hono/cookie";
 import { createAgent } from "./ai/agent";
 import type { Env } from "./env";
+import { recordVisitor } from "./visitor";
 
 const MAX_HISTORY_MESSAGES = 12;
 const APOLOGY =
@@ -10,7 +11,6 @@ const APOLOGY =
 
 const SESSION_COOKIE = "chat_sid";
 const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 90; // 90 days
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface ChatMessage {
   role: "user" | "ai" | "assistant";
@@ -103,23 +103,17 @@ function extractTextDelta(chunk: unknown, state: StreamRoleState): string {
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Storage failures must never break the chat, so inserts are fire-and-forget
-// via waitUntil and only log.
-async function recordMessage(
+function recordMessage(
   env: Env,
   sessionId: string,
   role: "user" | "assistant",
   text: string
-): Promise<void> {
-  try {
-    await env.DB.prepare(
-      "INSERT INTO chat_messages (session_id, role, text) VALUES (?, ?, ?)"
-    )
-      .bind(sessionId, role, text)
-      .run();
-  } catch (error) {
-    console.error("failed to persist chat message:", error);
-  }
+): Promise<D1Result> {
+  return env.DB.prepare(
+    "INSERT INTO chat_messages (session_id, role, text) VALUES (?, ?, ?)"
+  )
+    .bind(sessionId, role, text)
+    .run();
 }
 
 app.post("/api/chat", async (c) => {
@@ -141,11 +135,13 @@ app.post("/api/chat", async (c) => {
   // message is persisted - exactly once per turn. A uuid cookie groups turns
   // from the same browser into one conversation without client changes.
   const cookieSid = getCookie(c, SESSION_COOKIE);
-  const sessionId = UUID_RE.test(cookieSid ?? "") ? cookieSid! : crypto.randomUUID();
+  const sessionId = cookieSid ?? crypto.randomUUID();
 
   c.executionCtx.waitUntil(
     recordMessage(c.env, sessionId, "user", messages[messages.length - 1].text)
   );
+  // request metadata (ip/geo/user-agent) per conversation, upserted each turn
+  c.executionCtx.waitUntil(recordVisitor(c, sessionId));
 
   const agent = createAgent(c.env);
   const stream = new ReadableStream({
