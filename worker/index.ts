@@ -104,23 +104,17 @@ function extractTextDelta(chunk: unknown, state: StreamRoleState): string {
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Storage failures must never break the chat, so inserts are fire-and-forget
-// via waitUntil and only log.
-async function recordMessage(
+function recordMessage(
   env: Env,
   sessionId: string,
   role: "user" | "assistant",
   text: string
-): Promise<void> {
-  try {
-    await env.DB.prepare(
-      "INSERT INTO chat_messages (session_id, role, text) VALUES (?, ?, ?)"
-    )
-      .bind(sessionId, role, text)
-      .run();
-  } catch (error) {
-    console.error("failed to persist chat message:", error);
-  }
+): Promise<D1Result> {
+  return env.DB.prepare(
+    "INSERT INTO chat_messages (session_id, role, text) VALUES (?, ?, ?)"
+  )
+    .bind(sessionId, role, text)
+    .run();
 }
 
 app.post("/api/chat", async (c) => {

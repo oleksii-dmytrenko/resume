@@ -27,15 +27,10 @@ function parseUserAgent(ua: string): { browser: string | null; os: string | null
 function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
   const cf = c.req.raw.cf;
   const header = (name: string) => c.req.header(name);
-  // CF-Connecting-IP is the single real client IP at the edge; the XFF
-  // fallback only matters in local dev.
-  const forwarded = header("x-forwarded-for");
-  const ip =
-    header("cf-connecting-ip") ?? (forwarded ? forwarded.split(",")[0].trim() : null);
   const userAgent = header("user-agent") ?? "";
   const parsed = parseUserAgent(userAgent);
   return {
-    ip,
+    ip: header("cf-connecting-ip") ?? null,
     country: cf?.country ?? null,
     region: cf?.region ?? null,
     city: cf?.city ?? null,
@@ -55,33 +50,29 @@ function collectVisitorInfo(c: Context<{ Bindings: Env }>) {
 
 // Upserted on every turn: first_seen sticks from the insert, everything else
 // refreshes so a returning visitor on a new network/browser shows the latest.
-async function recordVisitor(c: Context<{ Bindings: Env }>, sessionId: string): Promise<void> {
+function recordVisitor(c: Context<{ Bindings: Env }>, sessionId: string): Promise<D1Result> {
   const v = collectVisitorInfo(c);
-  try {
-    await c.env.DB.prepare(
-      `INSERT INTO chat_visitors
-         (session_id, ip, country, region, city, latitude, longitude, timezone,
-          asn, as_organization, colo, user_agent, browser, os, language)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(session_id) DO UPDATE SET
-         ip = excluded.ip, country = excluded.country, region = excluded.region,
-         city = excluded.city, latitude = excluded.latitude,
-         longitude = excluded.longitude, timezone = excluded.timezone,
-         asn = excluded.asn, as_organization = excluded.as_organization,
-         colo = excluded.colo, user_agent = excluded.user_agent,
-         browser = excluded.browser, os = excluded.os,
-         language = excluded.language,
-         last_seen = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`
+  return c.env.DB.prepare(
+    `INSERT INTO chat_visitors
+       (session_id, ip, country, region, city, latitude, longitude, timezone,
+        asn, as_organization, colo, user_agent, browser, os, language)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(session_id) DO UPDATE SET
+       ip = excluded.ip, country = excluded.country, region = excluded.region,
+       city = excluded.city, latitude = excluded.latitude,
+       longitude = excluded.longitude, timezone = excluded.timezone,
+       asn = excluded.asn, as_organization = excluded.as_organization,
+       colo = excluded.colo, user_agent = excluded.user_agent,
+       browser = excluded.browser, os = excluded.os,
+       language = excluded.language,
+       last_seen = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`
+  )
+    .bind(
+      sessionId, v.ip, v.country, v.region, v.city, v.latitude, v.longitude,
+      v.timezone, v.asn, v.asOrganization, v.colo, v.userAgent, v.browser,
+      v.os, v.language
     )
-      .bind(
-        sessionId, v.ip, v.country, v.region, v.city, v.latitude, v.longitude,
-        v.timezone, v.asn, v.asOrganization, v.colo, v.userAgent, v.browser,
-        v.os, v.language
-      )
-      .run();
-  } catch (error) {
-    console.error("failed to persist chat visitor:", error);
-  }
+    .run();
 }
 
 export { recordVisitor };
