@@ -4,6 +4,10 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Anthropic rejects API calls egressing from unsupported regions (e.g. HKG),
+  // and a Worker normally runs in the visitor's colo. Smart Placement moves
+  // execution next to the Anthropic backend so the chat works worldwide.
+  "placement": { "mode": "smart" },
   "assets": {
     "directory": "./web/dist",
     "binding": "ASSETS",
