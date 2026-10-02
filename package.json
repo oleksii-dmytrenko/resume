@@ -29,7 +29,7 @@
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.22.3",
+    "react-router-dom": "^7.18.4",
     "ua-parser-js": "^1.0.41",
     "zod": "^4.6.5"
   },
