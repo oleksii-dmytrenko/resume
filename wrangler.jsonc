@@ -5,9 +5,10 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   // Anthropic rejects API calls egressing from unsupported regions (e.g. HKG),
-  // and a Worker normally runs in the visitor's colo. Smart Placement moves
-  // execution next to the Anthropic backend so the chat works worldwide.
-  "placement": { "mode": "smart" },
+  // and a Worker normally runs in the visitor's colo. Pinning execution to
+  // US East keeps the api.anthropic.com egress in a supported region for
+  // every visitor.
+  "placement": { "mode": "targeted", "region": "aws:us-east-1" },
   "assets": {
     "directory": "./web/dist",
     "binding": "ASSETS",
