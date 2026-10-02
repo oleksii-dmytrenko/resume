@@ -5,13 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build && concurrently -n ui,worker -c blue,magenta npm:dev:ui npm:dev:worker",
-    "dev:ui": "vite",
+    "dev:ui": "cd web && vite",
     "dev:worker": "wrangler dev",
-    "build": "vite build",
+    "build": "cd web && vite build",
     "deploy": "npm run build && wrangler deploy",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p worker/tsconfig.json",
+    "typecheck": "tsc --noEmit -p web/tsconfig.app.json && tsc --noEmit -p worker/tsconfig.json",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "cd web && vite preview",
     "db:migrate": "wrangler d1 migrations apply resume-chats --local",
     "db:migrate:prod": "wrangler d1 migrations apply resume-chats --remote"
   },
