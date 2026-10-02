@@ -3,8 +3,7 @@ name: flow-review
 description: >-
   Launch an adversary review of the current branch against main. CODESTYLE.md
   applies to code; AGENTS.md applies to everything. Use when the user asks to
-  run /flow-review, adversary review, style review, or to gate apply
-  complete / archive.
+  run /flow-review, adversary review, or style review.
 ---
 # Review Agent
 
@@ -42,7 +41,7 @@ Use this exact prompt, substituting the workspace root's absolute path for
 Full Repository Path: <absolute repository path>
 Diff: git diff origin/main...HEAD (merge-base, three dots — not origin/main's tip)
 Base Branch: origin/main
-Custom Instructions: Adversary review of this branch versus origin/main, scoped to commits since the merge-base. Read CODESTYLE.md and AGENTS.md at the repository root. Apply CODESTYLE.md only to code (application source and app config files that sit with it: TypeScript, Svelte, backend, `.env.example` — not markdown, skills, specs, or docs). Apply AGENTS.md to every changed file. You are an adversary, not a collaborator. For code, assume the diff is hiding style violations, wrong-layer code, defensive branches, swallowed errors, `any`/`as`, speculative flexibility, and regexes used for validation. For everything else, report only AGENTS.md violations. Report only concrete violations with file:line, the broken rule, and the fix. Do not praise. Do not suggest optional polish. Do not invent issues outside the diff. Severity: blocking (must remediate or user-justify before treating apply as complete) or n/a — there is no advisory tier. If there are no violations, the entire response is the single token CLEAN.
+Custom Instructions: Adversary review of this branch versus origin/main, scoped to commits since the merge-base. Read CODESTYLE.md and AGENTS.md at the repository root. Apply CODESTYLE.md only to code (application source and app config files that sit with it: TypeScript, Svelte, backend, `.env.example` — not markdown, skills, specs, or docs). Apply AGENTS.md to every changed file. You are an adversary, not a collaborator. For code, assume the diff is hiding style violations, wrong-layer code, defensive branches, swallowed errors, `any`/`as`, speculative flexibility, and regexes used for validation. For everything else, report only AGENTS.md violations. Report only concrete violations with file:line, the broken rule, and the fix. Do not praise. Do not suggest optional polish. Do not invent issues outside the diff. Severity: blocking (must remediate or user-justify before treating the change as done) or n/a — there is no advisory tier. If there are no violations, the entire response is the single token CLEAN.
 ```
 
 If the subagent fails because the prompt was invoked incorrectly, retry once immediately. If it fails again, or fails for any other reason, stop. Tell the user the review could not complete and include the short error. Do not keep retrying. Do not compensate with an alternate diff mode.
@@ -53,6 +52,6 @@ After the subagent finishes:
 - No violations: the entire reply to the user is the single token `CLEAN`.
 - Violations: a compact markdown table, one row per finding, columns Severity, Location (file:line), Finding.
 
-Unresolved findings block treating apply as complete (including archive) until each finding is remediated or the user explicitly justifies keeping it. They do not require withholding the first commit. Do not create commits, continue `flow-apply`, or treat the change as done while blocking findings remain without that justification.
+Unresolved findings block treating the change as done until each finding is remediated or the user explicitly justifies keeping it. Review does not gate the first commit. While blocking findings remain unresolved without that justification, do not create further commits or treat the change as done.
 
 Do not fix findings or rerun review unless the user explicitly asks for that next step.
