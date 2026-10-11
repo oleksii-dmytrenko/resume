@@ -22,6 +22,7 @@
     "@visx/scale": "^4.0.0",
     "@visx/text": "^4.0.0",
     "@visx/wordcloud": "^4.0.0",
+    "bowser": "^2.14.1",
     "d3-array": "^3.2.4",
     "deep-chat-react": "^2.5.1",
     "framer-motion": "^11.0.8",
@@ -30,7 +31,6 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",
-    "ua-parser-js": "^1.0.41",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -39,7 +39,6 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@types/ua-parser-js": "^0.7.39",
     "@vitejs/plugin-react": "^4.3.1",
     "concurrently": "^10.0.5",
     "eslint": "^10.12.0",
