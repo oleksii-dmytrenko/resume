@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Wordcloud from '@visx/wordcloud/lib/Wordcloud';
+import { Wordcloud } from '@visx/wordcloud';
 import { Text } from '@visx/text';
 import { scaleLog } from '@visx/scale';
 
