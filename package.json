@@ -18,7 +18,7 @@
   "dependencies": {
     "@langchain/anthropic": "^1.5.12",
     "@langchain/core": "^1.2.13",
-    "@langchain/langgraph": "^1.4.21",
+    "@langchain/langgraph": "^1.5.0",
     "@visx/scale": "^4.0.0",
     "@visx/text": "^4.0.0",
     "@visx/wordcloud": "^4.0.0",
@@ -31,7 +31,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261008.1",
